@@ -12,14 +12,18 @@ def distancesFromCoords():
         distances.append(row)
     return distances
 
+#calcula el costo de la lista de ciudades la cual incluye las 100 ciudades + la inicial
+#RECIBE: numero lista de ciudades o solucion y matriz de adjacencia
+#RETORNA un valor numerico con el valor de z
 def calculateZ(myList,distances): 
     sum=0
-    for i in range(len(myList)-2):
+    for i in range(len(myList)-2): #se detiene en -2 para llegar a la penultima ciudad porque la ultima es el retorno
         fromCity=myList[i] #el numero en la posicion i. (que puede ser del 0 al 99)
         toCity=myList[i+1]
         sum=sum+distances[fromCity][toCity]
     return sum
 
+#Genera una solucion con 100 ciudades + la inicial como ultima
 def generateInitialSolution(nCities):
     list1=[i for i in range(nCities)]
     list2=[]
@@ -29,24 +33,28 @@ def generateInitialSolution(nCities):
     list2.append(list2[0])
     return list2
 
-def disturbSolution(citiesList):
-    disturb=citiesList[:]
-    rand1=random.randint(0,99)
-    rand2=random.randint(0,99)
-    temp1=disturb[rand1]
-    disturb[rand1]=disturb[rand2]
-    disturb[rand2]=temp1
-    disturb[len(disturb)-1]=disturb[0]
-    return disturb
+# def disturbSolution(citiesList):
+#     disturb=citiesList[:]
+#     rand1=random.randint(0,99)
+#     rand2=random.randint(0,99)
+#     temp1=disturb[rand1]
+#     disturb[rand1]=disturb[rand2]
+#     disturb[rand2]=temp1
+#     disturb[len(disturb)-1]=disturb[0]
+#     return disturb
 
+#retorna una matriz igual que la de adjacencia pero con los valores 1/x
 def matrizHeuristicaLocal(matrizDistancias):
     #first we make a safe copy
     matrizHL=matrizDistancias[:]
     for i in range(len(matrizDistancias)):
         for j in range(len(matrizDistancias[i])):
-            matrizHL[i][j]=1/matrizHL[i][j]
+            if(matrizHL[i][j] !=0 ):
+                matrizHL[i][j]=1/matrizHL[i][j]
     return matrizHL
 
+#metodo manual para hacer una matriz en 0 de las mismas dimenciones de la matriz pasada
+#usada para crear la matriz de feromonas inicial
 def ZeroMatrizOfSameDimension(matrizGuia):
     nrow=len(matrizGuia)
     ncol=len(matrizGuia[0])
@@ -65,11 +73,12 @@ def explo_matrizFeromonaInicial(matrizDistancias,n):
     matrizFeromonas=ZeroMatrizOfSameDimension(matrizDistancias)
     #Generamos cualquier solucion inicial
     nSolution=generateInitialSolution(len(matrizDistancias))
-    #el ciclo se repetira n veces primero (100 esta bien)
+    #el ciclo se repetira n veces primero (1000 estaria bien)
     while(n>0):
         #en cada iteracion se probara con una solucion aleatoria y apartir de su Z
         #se llenara la matriz de feromonas
-        nSolution=disturbSolution(nSolution)
+        #no es perturbar es general una matriz totalmente Distinta
+        nSolution=generateInitialSolution(len(matrizDistancias))
         zOfCurrentSolution=calculateZ(nSolution,matrizDistancias)
         inverseZ=1/zOfCurrentSolution
         #-2 porque la ultima ciudad(len -1 ) no ira a ninguna, ya sera la primera desde donde se partio
